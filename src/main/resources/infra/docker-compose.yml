@@ -141,7 +141,7 @@ services:
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
 
   schema-registry:
-    image: bitnami/schema-registry:7.6
+    image: confluentinc/cp-schema-registry:latest
     ports:
       - '127.0.0.1:8083:8083'
     depends_on:
@@ -150,12 +150,11 @@ services:
       - kafka-1
       - kafka-2
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8083
-      SCHEMA_REGISTRY_KAFKA_BROKERS: PLAINTEXT://kafka-0:9092,PLAINTEXT://kafka-1:9092,PLAINTEXT://kafka-2:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-0:9092,PLAINTEXT://kafka-1:9092,PLAINTEXT://kafka-2:9092
     networks:
-      - proxynet
+      - confluent
 
 networks:
   proxynet:

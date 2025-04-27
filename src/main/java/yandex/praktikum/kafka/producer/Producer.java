@@ -46,15 +46,14 @@ public class Producer {
     @SneakyThrows
     @Scheduled(fixedDelayString = "20", timeUnit = TimeUnit.SECONDS)
     public void sendShopInfoToTopic() {
-        KafkaProducer<Long, String> shopInfoProducer = getShopInfoProducer();
+        KafkaProducer<Long, ShopInfo> shopInfoProducer = getShopInfoProducer();
 
         // Отправка сообщений в топик
         int randomNumber = getRandomNumber(10);
         for (long i = 0; i < randomNumber; i++) {
             var shopInfo = buildShopInfo(i);
-            String string = new ObjectMapper().writeValueAsString(shopInfo);
-            ProducerRecord<Long, String> record = new ProducerRecord<>(kafkaProperties.getTopicProducts(), i,
-                    string);
+            ProducerRecord<Long, ShopInfo> record = new ProducerRecord<>(kafkaProperties.getTopicProducts(), i,
+                    shopInfo);
             shopInfoProducer.send(record);
             log.info("Сообщение {} успешно отправлено в топик {}", record.value(), kafkaProperties.getTopicProducts());
         }
@@ -71,13 +70,13 @@ public class Producer {
 //        stringProducer.close();
 //    }
 
-    private KafkaProducer<Long, String> getShopInfoProducer() {
+    private KafkaProducer<Long, ShopInfo> getShopInfoProducer() {
         Properties properties = getCommonProducerProperties();
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-//        properties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
-//        properties.put("auto.register.schemas", true);
-//        properties.put("use.latest.version", true);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaJsonSchemaSerializer.class.getName());
+        properties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
+        properties.put("auto.register.schemas", true);
+        properties.put("use.latest.version", true);
 
         properties.put(SASL_MECHANISM, "PLAIN");
         properties.put(SASL_JAAS_CONFIG, String.format(JAAS_TEMPLATE, "kafka", "bitnami"));
@@ -142,8 +141,8 @@ public class Producer {
                 .tags(TAGS)
                 .images(buildImages())
                 .specifications(buildSpecifications())
-//                .createdAt(LocalDateTime.now().minusDays(1))
-//                .updatedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .updatedAt(LocalDateTime.now())
                 .index("products")
                 .storeId(String.valueOf(productId))
                 .build();
