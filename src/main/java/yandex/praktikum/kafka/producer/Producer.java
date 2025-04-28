@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import yandex.praktikum.kafka.config.KafkaProperties;
 import yandex.praktikum.kafka.dto.*;
 import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer;
+import yandex.praktikum.kafka.streams.KafkaStreamsMessageFilter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public class Producer {
             "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";";
 
     private final KafkaProperties kafkaProperties;
+    private final KafkaStreamsMessageFilter filter;
 
     @SneakyThrows
     @Scheduled(fixedDelayString = "20", timeUnit = TimeUnit.SECONDS)
@@ -58,6 +60,7 @@ public class Producer {
             log.info("Сообщение {} успешно отправлено в топик {}", record.value(), kafkaProperties.getTopicProducts());
         }
         shopInfoProducer.close();
+        filter.filterProducts();
     }
 
     public void sendDeprecatedProduct(String deprecatedProduct) {
