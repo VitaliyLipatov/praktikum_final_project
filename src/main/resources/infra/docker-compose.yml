@@ -38,6 +38,7 @@ services:
       - zookeeper-source
     ports:
       - "9093:9093"
+      - "9082:9082"
     networks:
       - confluent
     volumes:
@@ -52,8 +53,8 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_DELETE_TOPIC_ENABLE: true
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://:9092,SASL_SSL://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-0:9092,SASL_SSL://127.0.0.1:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9082,SASL_SSL://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-0:9082,SASL_SSL://127.0.0.1:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_SSL:SASL_SSL
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
@@ -75,6 +76,7 @@ services:
       - zookeeper-source
     ports:
       - "9095:9095"
+      - "9083:9083"
     networks:
       - confluent
     volumes:
@@ -89,8 +91,8 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_DELETE_TOPIC_ENABLE: true
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://:9092,SASL_SSL://0.0.0.0:9095
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,SASL_SSL://127.0.0.1:9095
+      KAFKA_LISTENERS: PLAINTEXT://:9083,SASL_SSL://0.0.0.0:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9083,SASL_SSL://127.0.0.1:9095
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_SSL:SASL_SSL
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
@@ -112,6 +114,7 @@ services:
       - zookeeper-source
     ports:
       - "9097:9097"
+      - "9084:9084"
     networks:
       - confluent
     volumes:
@@ -126,8 +129,8 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_DELETE_TOPIC_ENABLE: true
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://:9092,SASL_SSL://0.0.0.0:9097
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,SASL_SSL://127.0.0.1:9097
+      KAFKA_LISTENERS: PLAINTEXT://:9084,SASL_SSL://0.0.0.0:9097
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9084,SASL_SSL://127.0.0.1:9097
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,SASL_SSL:SASL_SSL
       KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
       KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
@@ -152,7 +155,7 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8083
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-0:9092,PLAINTEXT://kafka-1:9092,PLAINTEXT://kafka-2:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-0:9082,PLAINTEXT://kafka-1:9083,PLAINTEXT://kafka-2:9084
     networks:
       - confluent
 
@@ -160,20 +163,28 @@ services:
     image: confluentinc/cp-zookeeper
     hostname: zookeeper-destination
     container_name: zookeeper-destination
+    ports:
+      - "2182:2182"
+    networks:
+      - confluent
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_CLIENT_PORT: 2182
 
   kafka-destination-0:
     image: confluentinc/cp-kafka
     hostname: kafka-destination-0
     container_name: kafka-destination-0
+    networks:
+      - confluent
     depends_on:
       - zookeeper-destination
     ports:
       - "9193:9193"
     environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2182'
+      KAFKA_LISTENERS: PLAINTEXT://:9193
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-destination-0:9193
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
@@ -181,13 +192,17 @@ services:
     image: confluentinc/cp-kafka
     hostname: kafka-destination-1
     container_name: kafka-destination-1
+    networks:
+      - confluent
     depends_on:
       - zookeeper-destination
     ports:
       - "9195:9195"
     environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2182'
+      KAFKA_LISTENERS: PLAINTEXT://:9195
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-destination-1:9195
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
@@ -195,18 +210,24 @@ services:
     image: confluentinc/cp-kafka
     hostname: kafka-destination-2
     container_name: kafka-destination-2
+    networks:
+      - confluent
     depends_on:
       - zookeeper-destination
     ports:
       - "9197:9197"
     environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper-destination:2182'
+      KAFKA_LISTENERS: PLAINTEXT://:9197
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-destination-2:9197
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   mirror-maker:
     image: confluentinc/cp-kafka
+    networks:
+      - confluent
     volumes:
       - ./consumer.cfg:/etc/consumer.cfg
       - ./producer.cfg:/etc/producer.cfg
@@ -215,6 +236,22 @@ services:
       - kafka-0
       - kafka-destination-0
       - zookeeper-destination
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    depends_on:
+      - mirror-maker
+    networks:
+      - confluent
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9082
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_1_NAME: local2
+      KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: kafka-destination-0:9193
+      KAFKA_CLUSTERS_1_ZOOKEEPER: zookeeper:2182
 
 networks:
   proxynet:

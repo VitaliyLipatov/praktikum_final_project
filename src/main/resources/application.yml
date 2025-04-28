@@ -6,5 +6,8 @@ kafka:
   bootstrap-servers: localhost:9093, localhost:9095, localhost:9097
   acks: all
   retries: 3
-  replicas: 3
+  replicas: 2
   topic-products: products
+  topic-deprecated-products: deprecated-products
+server:
+  port: 8888

@@ -14,4 +14,5 @@ public class KafkaProperties {
     private Integer retries;
     private String replicas;
     private String topicProducts;
+    private String topicDeprecatedProducts;
 }

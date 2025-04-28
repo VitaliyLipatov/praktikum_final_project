@@ -33,12 +33,12 @@ import static org.apache.kafka.common.config.SslConfigs.*;
 public class Producer {
 
     private static final List<String> PRODUCT_NAMES = List.of("Умные часы XYZ", "Смартфон Samsung", "Набор отвёрток",
-            "Бензопила");
+            "Бензопила", "Айфон", "Кувалда");
     private static final List<String> CATEGORIES = List.of("Электроника", "Инструменты");
     private static final List<String> TAGS = List.of("умные часы", "гаджеты", "технологии");
 
     private static final String SCHEMA_REGISTRY_URL = "http://localhost:8083";
-    private static final String JAAS_TEMPLATE =
+    public static final String JAAS_TEMPLATE =
             "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";";
 
     private final KafkaProperties kafkaProperties;
@@ -60,15 +60,15 @@ public class Producer {
         shopInfoProducer.close();
     }
 
-//    public void sendDeprecatedProduct(String deprecatedProduct) {
-//        KafkaProducer<String, String> stringProducer = getStringProducer();
-//        ProducerRecord<String, String> record = new ProducerRecord<>(kafkaProperties.getTopicDeprecatedWords(),
-//                deprecatedProduct, deprecatedProduct);
-//        stringProducer.send(record);
-//        log.info("Запрещённый товар {} успешно отправлен в топик {}", record.value(),
-//                kafkaProperties.getTopicDeprecatedWords());
-//        stringProducer.close();
-//    }
+    public void sendDeprecatedProduct(String deprecatedProduct) {
+        KafkaProducer<String, String> stringProducer = getStringProducer();
+        ProducerRecord<String, String> record = new ProducerRecord<>(kafkaProperties.getTopicDeprecatedProducts(),
+                deprecatedProduct, deprecatedProduct);
+        stringProducer.send(record);
+        log.info("Запрещённый товар {} успешно отправлен в топик {}", record.value(),
+                kafkaProperties.getTopicDeprecatedProducts());
+        stringProducer.close();
+    }
 
     private KafkaProducer<Long, ShopInfo> getShopInfoProducer() {
         Properties properties = getCommonProducerProperties();
@@ -77,17 +77,6 @@ public class Producer {
         properties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
         properties.put("auto.register.schemas", true);
         properties.put("use.latest.version", true);
-
-        properties.put(SASL_MECHANISM, "PLAIN");
-        properties.put(SASL_JAAS_CONFIG, String.format(JAAS_TEMPLATE, "kafka", "bitnami"));
-        properties.put(SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
-        properties.put(SSL_TRUSTSTORE_PASSWORD_CONFIG, "password_0");
-        properties.put(SSL_PROTOCOL_CONFIG, "TLS");
-        properties.put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
-        properties.put(SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
-        properties.put(SSL_TRUSTSTORE_LOCATION_CONFIG,
-                "C:\\Users\\vital\\спринт_5\\kafka-0-creds\\etc\\kafka\\secrets\\kafka.kafka-0.truststore.jks");
-
 
         // Создание продюсера
         return new KafkaProducer<>(properties);
@@ -114,6 +103,16 @@ public class Producer {
         properties.put(ProducerConfig.RETRIES_CONFIG, kafkaProperties.getRetries());
         // Минимум 2 реплики должны подтвердить запись
         properties.put(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, kafkaProperties.getReplicas());
+
+        properties.put(SASL_MECHANISM, "PLAIN");
+        properties.put(SASL_JAAS_CONFIG, String.format(JAAS_TEMPLATE, "kafka", "bitnami"));
+        properties.put(SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
+        properties.put(SSL_TRUSTSTORE_PASSWORD_CONFIG, "password_0");
+        properties.put(SSL_PROTOCOL_CONFIG, "TLS");
+        properties.put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
+        properties.put(SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
+        properties.put(SSL_TRUSTSTORE_LOCATION_CONFIG,
+                "C:\\Users\\vital\\спринт_5\\kafka-0-creds\\etc\\kafka\\secrets\\kafka.kafka-0.truststore.jks");
 
         return properties;
     }
