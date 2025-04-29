@@ -12,7 +12,7 @@ services:
       - data-zookeeper-data-1:/var/lib/zookeeper/data
       - ./etc/zookeeper/secrets/zookeeper.sasl.jaas.conf:/etc/zookeeper/secrets/zookeeper.sasl.jaas.conf
     networks:
-      - confluent
+      - proxynet
     environment:
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -40,7 +40,7 @@ services:
       - "9093:9093"
       - "9082:9082"
     networks:
-      - confluent
+      - proxynet
     volumes:
       - data-kafka-0:/var/lib/kafka/data
       - ./kafka-0-creds/etc/kafka/secrets:/etc/kafka/secrets
@@ -78,7 +78,7 @@ services:
       - "9095:9095"
       - "9083:9083"
     networks:
-      - confluent
+      - proxynet
     volumes:
       - data-kafka-1:/var/lib/kafka/data
       - ./kafka-1-creds/etc/kafka/secrets:/etc/kafka/secrets
@@ -116,7 +116,7 @@ services:
       - "9097:9097"
       - "9084:9084"
     networks:
-      - confluent
+      - proxynet
     volumes:
       - data-kafka-2:/var/lib/kafka/data
       - ./kafka-2-creds/etc/kafka/secrets:/etc/kafka/secrets
@@ -146,7 +146,7 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:latest
     ports:
-      - '127.0.0.1:8083:8083'
+      - '127.0.0.1:8081:8081'
     depends_on:
       - zookeeper-source
       - kafka-0
@@ -154,10 +154,10 @@ services:
       - kafka-2
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8083
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-0:9082,PLAINTEXT://kafka-1:9083,PLAINTEXT://kafka-2:9084
     networks:
-      - confluent
+      - proxynet
 
   zookeeper-destination:
     image: confluentinc/cp-zookeeper
@@ -166,7 +166,7 @@ services:
     ports:
       - "2182:2182"
     networks:
-      - confluent
+      - proxynet
     environment:
       ZOOKEEPER_CLIENT_PORT: 2182
 
@@ -175,7 +175,7 @@ services:
     hostname: kafka-destination-0
     container_name: kafka-destination-0
     networks:
-      - confluent
+      - proxynet
     depends_on:
       - zookeeper-destination
     ports:
@@ -193,7 +193,7 @@ services:
     hostname: kafka-destination-1
     container_name: kafka-destination-1
     networks:
-      - confluent
+      - proxynet
     depends_on:
       - zookeeper-destination
     ports:
@@ -211,7 +211,7 @@ services:
     hostname: kafka-destination-2
     container_name: kafka-destination-2
     networks:
-      - confluent
+      - proxynet
     depends_on:
       - zookeeper-destination
     ports:
@@ -227,7 +227,7 @@ services:
   mirror-maker:
     image: confluentinc/cp-kafka
     networks:
-      - confluent
+      - proxynet
     volumes:
       - ./consumer.cfg:/etc/consumer.cfg
       - ./producer.cfg:/etc/producer.cfg
@@ -242,7 +242,7 @@ services:
     depends_on:
       - mirror-maker
     networks:
-      - confluent
+      - proxynet
     ports:
       - "8080:8080"
     environment:
@@ -253,10 +253,50 @@ services:
       KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS: kafka-destination-0:9193
       KAFKA_CLUSTERS_1_ZOOKEEPER: zookeeper:2182
 
+  kafka-connect:
+    build:
+      context: ./kafka-connect
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka-0
+      - kafka-1
+      - kafka-2
+      - schema-registry
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka-0:9082
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: 'kafka-connect'
+
+      CONNECT_REST_ADVERTISED_HOST_NAME: 'localhost'
+
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+      CONNECT_CONFIG_STORAGE_TOPIC: 'connect-config-storage'
+      CONNECT_OFFSET_STORAGE_TOPIC: 'connect-offset-storage'
+      CONNECT_STATUS_STORAGE_TOPIC: 'connect-status-storage'
+
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081/'
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081/'
+      CONNECT_CONFIG_PROVIDERS: "file"
+      CONNECT_CONFIG_PROVIDERS_FILE_CLASS: "org.apache.kafka.common.config.provider.FileConfigProvider"
+
+      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+    volumes:
+      - ./confluent-hub-components/:/etc/kafka-connect/jars
+    networks:
+      - proxynet
+
 networks:
   proxynet:
     name: custom_network
-  confluent:
 
 volumes:
   data-zookeeper-log-1:

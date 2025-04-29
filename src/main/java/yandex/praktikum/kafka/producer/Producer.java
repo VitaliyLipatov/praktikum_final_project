@@ -38,7 +38,7 @@ public class Producer {
     private static final List<String> CATEGORIES = List.of("Электроника", "Инструменты");
     private static final List<String> TAGS = List.of("умные часы", "гаджеты", "технологии");
 
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8083";
+    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
     public static final String JAAS_TEMPLATE =
             "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";";
 

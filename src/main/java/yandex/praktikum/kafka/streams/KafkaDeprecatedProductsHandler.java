@@ -81,7 +81,7 @@ public class KafkaDeprecatedProductsHandler {
                 }
             }
 
-            // Запрашиваем хранилище с именем deprecated-word-store для извлечения данных.
+            // Запрашиваем хранилище с именем deprecated-products-store для извлечения данных.
             return streams.store(
                     fromNameAndType("deprecated-products-store", QueryableStoreTypes.keyValueStore())
             );
