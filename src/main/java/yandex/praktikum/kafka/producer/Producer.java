@@ -73,6 +73,16 @@ public class Producer {
         stringProducer.close();
     }
 
+    public void sendClientInfoToTopic(ClientInfo clientInfo) {
+        KafkaProducer<String, ClientInfo> clientInfoProducer = getClientInfoProducer();
+        ProducerRecord<String, ClientInfo> clientInfoRecord = new ProducerRecord<>(
+                kafkaProperties.getTopicClientsRequest(), clientInfo.getUserName(), clientInfo);
+        clientInfoProducer.send(clientInfoRecord);
+        log.info("Сообщение {} успешно отправлено в топик {}", clientInfoRecord.value(),
+                kafkaProperties.getTopicClientsRequest());
+        clientInfoProducer.close();
+    }
+
     private KafkaProducer<Long, ShopInfo> getShopInfoProducer() {
         Properties properties = getCommonProducerProperties();
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
@@ -91,6 +101,18 @@ public class Producer {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         // Создание продюсера
+        return new KafkaProducer<>(properties);
+    }
+
+    private KafkaProducer<String, ClientInfo> getClientInfoProducer() {
+        Properties properties = getCommonProducerProperties();
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaJsonSchemaSerializer.class.getName());
+
+        properties.put("schema.registry.url", SCHEMA_REGISTRY_URL);
+        properties.put("auto.register.schemas", true);
+        properties.put("use.latest.version", true);
+
         return new KafkaProducer<>(properties);
     }
 

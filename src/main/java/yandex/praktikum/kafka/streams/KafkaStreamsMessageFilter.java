@@ -49,7 +49,7 @@ public class KafkaStreamsMessageFilter {
 
             // Отправка отфильтрованных данных в другой топик
             productsStream.filter((key, productMessage) -> filterProducts(productMessage))
-                    .to(kafkaProperties.getTopicProducts());
+                    .to(kafkaProperties.getTopicFilteredProducts());
 
             // Инициализация Kafka Streams
             KafkaStreams streams = new KafkaStreams(builder.build(), properties);

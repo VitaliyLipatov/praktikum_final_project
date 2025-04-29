@@ -15,4 +15,6 @@ public class KafkaProperties {
     private String replicas;
     private String topicProducts;
     private String topicDeprecatedProducts;
+    private String topicFilteredProducts;
+    private String topicClientsRequest;
 }

@@ -34,6 +34,7 @@ public class ShopController {
                 .productName(productName)
                 .build();
         log.info("Получен запрос на получение информации о товаре {}", clientInfo);
+        producer.sendClientInfoToTopic(clientInfo);
     }
 
     @Operation(summary = "Получить рекомендацию")

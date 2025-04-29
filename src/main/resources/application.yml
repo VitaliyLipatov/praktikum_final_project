@@ -9,5 +9,7 @@ kafka:
   replicas: 2
   topic-products: products
   topic-deprecated-products: deprecated-products
+  topic-filtered-products: filtered-products
+  topic-clients-request: clients-request
 server:
   port: 8888
