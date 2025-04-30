@@ -12,3 +12,5 @@ curl -X PUT \
 "value.converter": "org.apache.kafka.connect.storage.StringConverter"
 }' \
 http://localhost:8083/connectors/file-stream-sink/config
+
+http://localhost:3001/ grafana
