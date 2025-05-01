@@ -49,9 +49,18 @@ dependencies {
         exclude(group: "org.slf4j", module: "slf4j-api")
         exclude(group: "org.slf4j", module: "slf4j-simple")
     }
-    implementation "org.apache.spark:spark-streaming_2.12:3.2.0"
-    implementation "org.apache.spark:spark-sql_2.12:3.2.0"
-    implementation "org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.0"
+    implementation("org.apache.spark:spark-streaming_2.12:3.2.0") {
+        exclude(group: "org.slf4j", module: "slf4j-api")
+        exclude(group: "org.slf4j", module: "slf4j-simple")
+    }
+    implementation("org.apache.spark:spark-sql_2.12:3.2.0") {
+        exclude(group: "org.slf4j", module: "slf4j-api")
+        exclude(group: "org.slf4j", module: "slf4j-simple")
+    }
+    implementation("org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.0") {
+        exclude(group: "org.slf4j", module: "slf4j-api")
+        exclude(group: "org.slf4j", module: "slf4j-simple")
+    }
 
     implementation "org.apache.commons:commons-lang3:3.12.0"
 
