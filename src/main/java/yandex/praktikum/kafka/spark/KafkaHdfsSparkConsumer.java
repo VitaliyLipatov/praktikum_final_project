@@ -52,11 +52,8 @@ public class KafkaHdfsSparkConsumer {
                     }
                     System.out.println("Сообщение записано в HDFS по пути: " + hdfsFilePath);
                     processWithSpark(hdfsUri);
-
                 }
-
             }
-
 
         } catch (
                 Exception e) {

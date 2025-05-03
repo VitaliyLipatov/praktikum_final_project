@@ -49,7 +49,7 @@ public class ShopController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @Operation(summary = "Получить рекомендацию")
+    @Operation(summary = "Получить рекомендацию о товаре")
     @GetMapping(path = "/recommendation", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Информация о товаре получена"),
