@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -104,7 +105,7 @@ public class KafkaStreamsMessageFilter {
         while (keyValueIterator.hasNext()) {
             String currDeprProduct = keyValueIterator.next().value;
             ShopInfo shopInfo = objectMapper.readValue(productMessage.trim(), ShopInfo.class);
-            if (shopInfo.getName().contains(currDeprProduct)) {
+            if (StringUtils.containsIgnoreCase(shopInfo.getName(), currDeprProduct)) {
                 return false;
             }
         }

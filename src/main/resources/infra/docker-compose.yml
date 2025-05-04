@@ -398,6 +398,29 @@ services:
     networks:
       - proxynet
 
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:latest
+    depends_on:
+      - kafka-destination-0
+      - kafka-destination-1
+      - kafka-destination-2
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka-destination-0:9193
+    ports:
+      - "8088:8088"
+    networks:
+      - proxynet
+
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:latest
+    depends_on:
+      - ksqldb-server
+    entrypoint: /bin/sh -c 'exec ksql http://ksqldb-server:8088'
+    stdin_open: true
+    tty: true
+    networks:
+      - proxynet
+
 #  hadoop-namenode:
 #    image: apache/hadoop:3.4.1
 #    container_name: hadoop-namenode
