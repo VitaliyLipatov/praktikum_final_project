@@ -28,7 +28,7 @@ Swagger открывается в браузере по адресу http://loca
 
 Для потоковой фильтрации/блокировки запрещённых товаров реализован класс KafkaStreamsMessageFilter.
 Отфильтрованные товары из топика filtered-products с помощью FileStreamSinkConnector попадают в файл products.out.
-
+Для конфигурации коннектора использовал следующий запрос:
 curl -X PUT \
 -H "Content-Type: application/json" \
 --data '{
@@ -41,7 +41,17 @@ curl -X PUT \
 }' \
 http://localhost:8083/connectors/file-stream-sink/config
 
-http://localhost:3001/ grafana
+При поиске товара с помощью метода /info - анализируется содержимое файла products.out и при нахождении совпадения
+возвращается объект ShopInfo.
+
+Для кластера kafka реализован сбор метрик с помощью prometheus, собранные метрики визуализируется на дашбордах в 
+grafana. Grafana открывается по ссылке http://localhost:3001/, логин admin, пароль kafka. В grafana настроен Alerting
+на падение одного из брокеров. Если все 3 брокера запущены, то состояние правила normal (скриншот normal_grafana.png),
+после остановки одного брокера состояние правила изменилось на firing (скриншот firing_grafana.png).
+
+С помощью mirror-maker настроено дублирование данных всех топиков на второй кластер.
+
+Для первого кластера реализована безопасная передача данных через TLS, выданы права для работы с топиками (ACL).
 
 [appuser@kafka-0 ~]$ kafka-acls --authorizer-properties zookeeper.connect=zookeeper-source:2181 --add --allow-principal User:kafka --operation Write --topic products
 Warning: support for ACL configuration directly through the authorizer is deprecated and will be removed in a future release. Please use --bootstrap-server instead to set ACLs through the admin client.

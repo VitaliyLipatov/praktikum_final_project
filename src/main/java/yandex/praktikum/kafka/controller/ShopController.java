@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import yandex.praktikum.kafka.dto.ClientInfo;
 import yandex.praktikum.kafka.dto.ShopInfo;
 import yandex.praktikum.kafka.producer.Producer;
+import yandex.praktikum.kafka.service.RecommendationService;
 import yandex.praktikum.kafka.service.ShopService;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class ShopController {
 
     private final Producer producer;
     private final ShopService shopService;
+    private final RecommendationService recommendationService;
 
     @Operation(summary = "Получить данные о товаре по наименованию")
     @GetMapping(path = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,11 +55,14 @@ public class ShopController {
     @GetMapping(path = "/recommendation", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Информация о товаре получена"),
+            @ApiResponse(responseCode = "404", description = "Рекомендация для указанного пользователя не найдена"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка микросервиса")
     })
-    public void getRecommendation(@RequestParam String userName) {
+    public ResponseEntity<ShopInfo> getRecommendation(@RequestParam String userName) throws IOException {
         log.info("Запрос рекомендации для пользователя {}", userName);
-
+        Optional<ShopInfo> shopInfo = recommendationService.geRecommendation(userName);
+        return shopInfo.map(info -> new ResponseEntity<>(info, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @Operation(summary = "Добавить запрещённый товар в список")

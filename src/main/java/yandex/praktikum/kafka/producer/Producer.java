@@ -137,7 +137,7 @@ public class Producer {
         properties.put(SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
         properties.put(SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
         properties.put(SSL_TRUSTSTORE_LOCATION_CONFIG,
-                "C:\\Users\\vital\\спринт_5\\kafka-0-creds\\etc\\kafka\\secrets\\kafka.kafka-0.truststore.jks");
+                "C:\\Users\\vital\\IdeaProjects\\praktikum_final_project\\src\\main\\resources\\infra\\kafka-0-creds\\etc\\kafka\\secrets\\kafka.kafka-0.truststore.jks");
 
         return properties;
     }

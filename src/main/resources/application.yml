@@ -11,5 +11,6 @@ kafka:
   topic-deprecated-products: deprecated-products
   topic-filtered-products: filtered-products
   topic-clients-request: clients-request
+  topic-clients-recommendations: clients-recommendation
 server:
   port: 8888
