@@ -322,7 +322,7 @@ services:
       - proxynet
 
   prometheus:
-    image: "prom/prometheus:${PROMETHEUS_VERSION}"
+    image: "prom/prometheus:v2.47.1"
     restart: unless-stopped
     ports:
       - "9090:9090"
@@ -334,7 +334,7 @@ services:
       - proxynet
 
   grafana:
-    image: "grafana/grafana:${GRAFANA_VERSION}"
+    image: "grafana/grafana:9.5.12"
     restart: unless-stopped
     ports:
       - "3001:3000"
